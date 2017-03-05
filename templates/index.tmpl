@@ -1,0 +1,155 @@
+#? stdtmpl | standard
+#proc generate_index(baseurl, distro, flavour, pname: string): string =
+#  result = ""
+<html>
+  <body>
+    <style>
+      div#main {
+        padding: 3em;
+        color: #444;
+      }
+      ul li {
+        margin: 1em;
+      }
+      footer {
+        background-color: #f4f4f4;
+        border-top: 1px solid #999;
+        bottom:0;
+        display: block;
+        left: 0;
+        margin: 0;
+        position: absolute;
+        text-align: center;
+        width: 100%;
+      }
+      footer a {
+        text-decoration: none;
+      }
+    </style>
+    <div id="main">
+    <h3>Package version badges</h3>
+
+    <p>Show the current version of packages in Free Software distributions.<br/>
+    If a package is not present the version will appear as "none".
+    </p>
+
+    <p>Some examples:</p>
+    <table>
+      <tr>
+        <td>
+          Neovim
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/neovim">
+            <img src="/badges/debian/stable/neovim/version.svg">
+          </a>
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/neovim">
+            <img src="/badges/debian/unstable/neovim/version.svg">
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Nmap
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/nmap">
+            <img src="/badges/debian/stable/nmap/version.svg">
+          </a>
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/nmap">
+            <img src="/badges/debian/unstable/nmap/version.svg">
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Nim
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/nim">
+            <img src="/badges/debian/stable/nim/version.svg">
+          </a>
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/nim">
+            <img src="/badges/debian/unstable/nim/version.svg">
+          </a>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          Xcowsay
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/xcowsay">
+            <img src="/badges/debian/stable/xcowsay/version.svg">
+          </a>
+        </td>
+        <td>
+          <a href="https://packages.debian.org/sid/xcowsay">
+            <img src="/badges/debian/unstable/xcowsay/version.svg">
+          </a>
+        </td>
+      </tr>
+    </table>
+
+    <h4>Create a badge</h4>
+
+    <form action="/" method="post">
+      <select id="distro_and_flavour" name="distro_and_flavour">
+        <option value="debian|stable" checked>Debian Stable</option>
+        <option value="debian|testing" checked>Debian Testing</option>
+        <option value="debian|unstable">Debian Unstable</option>
+        <option value="ubuntu|xenial">Ubuntu Xenial</option>
+      </select>
+      # if pname == "PACKAGE_NAME":
+      Package name:<input type="text" name="pname">
+      # else:
+      Package name:<input type="text" name="pname" value="${pname}">
+      # end
+      <input type="submit" value="Submit"><br/>
+    </form>
+    # if distro != "DISTRIBUTION":
+    <script type="text/javascript">
+      # let selected = "$#|$#" % [distro, flavour]
+      document.getElementById("distro_and_flavour").value = "${selected}";
+    </script>
+    # end
+
+    <p>Badge</p>
+    <img src="${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg" alt="badge">
+
+    <p>Direct link</p>
+    <pre>
+    ${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg
+    </pre>
+
+    <p>AsciiDoc</p>
+    <pre>
+    image:${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg", link="${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg"]
+    </pre>
+
+    <p>Markdown</p>
+    <pre>
+    [![CircleCI](${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg)](${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg)
+    </pre>
+
+    <p>reStructuredText</p>
+    <pre>
+    .. image:: ${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg
+        :target: ${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg
+    </pre>
+    </div>
+    <footer>
+      <p>
+        <a href="https://github.com/FedericoCeratto/distrobadges">distrobadges</a>
+        - implemented in <a href="https://nim-lang.org">Nim</a>
+        - released under AGPLv3
+      </p>
+    </footer>
+  </body>
+</html>

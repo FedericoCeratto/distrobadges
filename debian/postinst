@@ -1,0 +1,30 @@
+#! /bin/sh
+
+set -e
+
+case "$1" in
+  configure)
+        if ! getent group distrobadges >/dev/null; then
+            addgroup --quiet --system distrobadges
+        fi
+
+        if ! getent passwd distrobadges >/dev/null; then
+            adduser --quiet --system --ingroup distrobadges --home /var/lib/distrobadges --no-create-home distrobadges
+            mkdir -p /var/lib/distrobadges
+        fi
+
+        mkdir -p /var/cache/distrobadges
+        for dir_name in /var/cache/distrobadges /var/lib/distrobadges; do
+            if ! dpkg-statoverride --list "$dir_name" >/dev/null 2>&1; then
+                dpkg-statoverride --update --add distrobadges distrobadges 0755 "$dir_name"
+            fi
+        done
+        touch /etc/default/distrobadges
+
+#PERMS#
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0

@@ -1,0 +1,15 @@
+Source: distrobadges
+Section: web
+Priority: optional
+Maintainer: Federico Ceratto <federico@debian.org>
+Build-Depends: debhelper (>= 9),
+ dh-autoreconf,
+ dh-systemd (>= 1.5),
+ nim
+Standards-Version: 3.9.8
+
+Package: distrobadges
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, curl
+Description: distrobadges
+ distrobadges

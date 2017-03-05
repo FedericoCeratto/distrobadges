@@ -1,0 +1,34 @@
+[Unit]
+Description=distrobadges
+After=network.target httpd.service squid.service nfs-server.service mysqld.service named.service postfix.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+WorkingDirectory=/var/lib/distrobadges/
+ExecStart=/usr/bin/distrobadges
+TimeoutStopSec=10
+KillMode=mixed
+KillSignal=SIGTERM
+
+User=distrobadges
+Group=distrobadges
+# Restart the daemon if crashes or is killed
+Restart=always
+RestartSec=2s
+LimitNOFILE=65536
+
+# Hardening
+NoNewPrivileges=yes
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH
+PrivateDevices=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=full
+StandardOutput=syslog+console
+StandardError=syslog+console
+ReadWriteDirectories=/proc/self
+ReadWriteDirectories=-/var/run
+
+[Install]
+WantedBy=multi-user.target

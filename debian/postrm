@@ -1,0 +1,32 @@
+#!/bin/sh
+
+set -e
+
+case "$1" in
+    remove)
+        ;;
+
+    purge)
+        for dir_name in /var/cache/distrohelper /var/lib/distrohelper; do
+            if dpkg-statoverride --list | grep -qw "$dir_name"; then
+                dpkg-statoverride --remove "$dir_name"
+            fi
+        done
+
+        if getent passwd distrohelper >/dev/null; then
+            deluser --quiet --system distrohelper || echo "Unable to remove distrohelper user"
+        fi
+
+        if getent group distrohelper >/dev/null; then
+            delgroup --quiet --system distrohelper || echo "Unable to remove distrohelper group"
+        fi
+
+        ;;
+
+    *)
+        ;;
+esac
+
+#DEBHELPER#
+
+exit 0
