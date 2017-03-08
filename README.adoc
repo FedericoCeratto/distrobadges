@@ -1,24 +1,15 @@
 === Distrobadges
 
-.Build:
+Distribution version badges
+
+.Devel Build:
 [source, bash]
 ----
 sudo apt-get install nim
-nimble install morelogging
-nimble install sdnotify
+nimble build
 ----
 
-.Deploy:
-[source, bash]
-----
-sudo adduser distrobadges --system --home /var/lib/myservicedir
-sudo touch /var/log/distrobadges.log
-sudo chown distrobadges:distrobadges /var/log/distrobadges.log
-sudo systemctl enable distrobadges
-sudo systemctl start distrobadges
-----
-
-.Build:
+.Debian Build:
 [source, bash]
 ----
 sudo apt-get install nim

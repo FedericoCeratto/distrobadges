@@ -27,25 +27,27 @@ type
     w0, w1, logoWidth, logoPadding: int
     color1, color2, logo, sbj, status: string
 
-const defaultsfile = "/etc/default/distrobadges"
 
-const distros: seq[DistroMetadata] = @[
-  ("debian", "stable", "dpkg",
-  "http://cdn-fastly.deb.debian.org/debian/dists/wheezy/main/binary-amd64/Packages.bz2"),
-  ("debian", "testing", "dpkg",
-  "http://cdn-fastly.deb.debian.org/debian/dists/testing/main/binary-amd64/Packages.xz"),
-  ("debian", "unstable", "dpkg",
-  "http://cdn-fastly.deb.debian.org/debian/dists/sid/main/binary-amd64/Packages.xz"),
-  ("ubuntu", "xenial", "dpkg",
-  "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/Packages.xz")
-]
+const
+  update_interval_s = 30 * 60
+  defaultsfile = "/etc/default/distrobadges"
+  distros: seq[DistroMetadata] = @[
+    ("debian", "stable", "dpkg",
+    "http://cdn-fastly.deb.debian.org/debian/dists/wheezy/main/binary-amd64/Packages.bz2"),
+    ("debian", "testing", "dpkg",
+    "http://cdn-fastly.deb.debian.org/debian/dists/testing/main/binary-amd64/Packages.xz"),
+    ("debian", "unstable", "dpkg",
+    "http://cdn-fastly.deb.debian.org/debian/dists/sid/main/binary-amd64/Packages.xz"),
+    ("ubuntu", "xenial", "dpkg",
+    "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/Packages.xz")
+  ]
 
 include "templates/index.tmpl"
 include "templates/badge-flat.svg"
 
 let log = newJournaldLogger()
 
-var baseurl = "NOT_CONFIGURED"
+var baseurl = "https://badges.debian.net/"
 var packages: DistroFlavors
 
 proc xz_unpack_package_list(src, dst: string) =
@@ -67,20 +69,21 @@ proc dpkg_extract_packages_version(fname: string): PkgsVersion =
   let t0 = epochTime()
   result = initTable[string, string]()
   var pname = ""
+  log.debug("Parsing $#" % fname)
   for line in fname.lines:
     if line.startswith("Package: "):
       if pname != "":
-        log.info "error"
+        log.info("Error: unexpected Package line")
       pname = line[9..^0]
     elif line.startswith("Version: "):
       if pname == "":
-        log.info "error"
+        log.info("Error: unexpected Version line")
       else:
         if result.haskey pname:
           log.info "duplicate: $#" % pname
         result[pname] = line[9..^0]
         pname = ""
-  log.debug $(epochTime() - t0)
+  log.debug("Parsing time: $#" % $(epochTime() - t0))
 
 
 #proc fetch_package_list(url, fname: string) =
@@ -163,7 +166,7 @@ routes:
     let badge = render_badge(distro, flavour, pname, version)
     let etag = "$#-$#-$#-$#" % [distro, flavour, pname, version]
     response.data.headers["ETag"] = etag
-    response.data.headers["Cache-Control"] = "max-age=600"
+    response.data.headers["Cache-Control"] = "max-age=600, must-revalidate, public"
     resp(badge, contentType = "image/svg+xml")
 
 proc parse_defaults() =
@@ -176,18 +179,20 @@ proc parse_defaults() =
   except:
     discard
 
-proc main() =
-  parse_defaults()
-  # init packages structure
+proc init_packages() =
+  ## init packages structure
   packages = initTable[string, FlavorPackages]()
   for distro in distros:
     if not packages.hasKey distro.name:
       packages[distro.name] = initTable[string, PkgsVersion]()
 
+proc update_packages() =
+  ## Fetch/update package lists from distribution repos
+  ## Extract package name and version and update the `packages` structure
   for distro in distros:
 
     let cfn = "$#-$#.compressedlist" % [distro.name, distro.flavour]
-    let fn = "/dev/shm/$#-$#.list" % [distro.name, distro.flavour]
+    let fn = "$#-$#.list" % [distro.name, distro.flavour]
     fetch_package_list(distro.pkg_list_url, cfn)
     case distro.format
     of "dpkg":
@@ -197,13 +202,26 @@ proc main() =
         bz_unpack_package_list(cfn, fn)
       else:
         log.error "unknown compression"
-        quit(1)
+        return
     else:
-      log.error "unknown format"
-      quit(1)
+      log.error "Unknown format $#" % distro.format
+      return
 
     packages[distro.name][distro.flavour] = dpkg_extract_packages_version fn
 
+proc run_packages_list_updater() {.async.} =
+  ## Call update_packages() forever
+  while true:
+    await sleepAsync(update_interval_s * 1000)
+    log.info("Starting packages update")
+    update_packages()
+    log.info("Package update completed")
+
+proc main() =
+  parse_defaults()
+  init_packages()
+  update_packages()
+  asyncCheck run_packages_list_updater()
   log.info "starting"
   runForever()
 

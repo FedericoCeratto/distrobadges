@@ -1,6 +1,6 @@
 [Unit]
 Description=distrobadges
-After=network.target httpd.service squid.service nfs-server.service mysqld.service named.service postfix.service
+After=network.target httpd.service
 Wants=network-online.target
 
 [Service]
@@ -27,7 +27,10 @@ ProtectHome=yes
 ProtectSystem=full
 StandardOutput=syslog+console
 StandardError=syslog+console
-ReadWriteDirectories=/proc/self
+ReadOnlyDirectories=/
+ReadWriteDirectories=-/proc/self
+ReadWriteDirectories=-/var/cache/distrobadges
+ReadWriteDirectories=-/var/lib/distrobadges
 ReadWriteDirectories=-/var/run
 
 [Install]
