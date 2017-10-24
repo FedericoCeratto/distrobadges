@@ -21,7 +21,7 @@ type
   DistroFlavors = Table[string, FlavorPackages]
 
   DistroMetadata = tuple
-    name, flavour, format, pkg_list_url: string
+    name, flavour, format, pkg_url_tpl, pkg_list_url: string
 
   BadgeParams = ref object
     w0, w1, logoWidth, logoPadding: int
@@ -33,12 +33,16 @@ const
   defaultsfile = "/etc/default/distrobadges"
   distros: seq[DistroMetadata] = @[
     ("debian", "stable", "dpkg",
+    "https://packages.$distro.org/$flavour/$pname",
     "http://cdn-fastly.deb.debian.org/debian/dists/wheezy/main/binary-amd64/Packages.bz2"),
     ("debian", "testing", "dpkg",
+    "https://packages.$distro.org/$flavour/$pname",
     "http://cdn-fastly.deb.debian.org/debian/dists/testing/main/binary-amd64/Packages.xz"),
     ("debian", "unstable", "dpkg",
+    "https://packages.$distro.org/$flavour/$pname",
     "http://cdn-fastly.deb.debian.org/debian/dists/sid/main/binary-amd64/Packages.xz"),
     ("ubuntu", "xenial", "dpkg",
+    "http://packages.$distro.org/$flavour/$pname",
     "http://archive.ubuntu.com/ubuntu/dists/xenial/main/binary-amd64/Packages.xz")
   ]
 
@@ -50,11 +54,14 @@ let log = newJournaldLogger()
 var baseurl = "https://badges.debian.net/"
 var packages: DistroFlavors
 
+# TODO: handle curl getting an HTML error page instead of tarball
+
 proc xz_unpack_package_list(src, dst: string) =
   ##
   let cmd = "xzgrep -e '^Package: ' -e '^Version: ' $# > $#" % [src, dst]
   log.info("unpacking: $#" % cmd)
   let exit_code = execCmd cmd
+  log.debug("Exit code: $#" % $exit_code)
   doAssert exit_code == 0
 
 proc bz_unpack_package_list(src, dst: string) =
@@ -62,6 +69,7 @@ proc bz_unpack_package_list(src, dst: string) =
   let cmd = "bzcat $# | grep -e '^Package: ' -e '^Version: ' > $#" % [src, dst]
   log.info "unpacking: $#" % cmd
   let exit_code = execCmd cmd
+  log.debug("Exit code: $#" % $exit_code)
   doAssert exit_code == 0
 
 proc dpkg_extract_packages_version(fname: string): PkgsVersion =
@@ -139,7 +147,7 @@ settings: port = 7700.Port
 routes:
 
   get "/":
-    resp generate_index(baseurl, "DISTRIBUTION", "FLAVOUR", "PACKAGE_NAME")
+    resp generate_index(baseurl, "DISTRIBUTION", "FLAVOUR", "PACKAGE_NAME", "")
 
   post "/":
     let tokens = @"distro_and_flavour".split('|')
@@ -149,7 +157,17 @@ routes:
       distro = filter_user_input tokens[0]
       flavour = filter_user_input tokens[1]
       pname = filter_user_input(@"pname")
-    resp generate_index(baseurl, distro, flavour, pname)
+      pkg_directory_url_tpl =
+        if distro == "debian":
+          "https://packages.debian.org/$flavour/$pname"
+        elif distro == "ubuntu":
+          "http://packages.ubuntu.com/$flavour/$pname"
+        else:
+          ""
+      pkg_directory_url = pkg_directory_url_tpl.replace("$distro", distro)
+        .replace("$flavour", flavour).replace("$pname", pname)
+
+    resp generate_index(baseurl, distro, flavour, pname, pkg_directory_url)
 
   get "/badges/@distro/@flavour/@pkg_name/version.svg":
     let
@@ -218,6 +236,7 @@ proc run_packages_list_updater() {.async.} =
     log.info("Package update completed")
 
 proc main() =
+  log.info("Starting distrobadges")
   parse_defaults()
   init_packages()
   update_packages()

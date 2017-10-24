@@ -1,32 +1,43 @@
 #? stdtmpl | standard
-#proc generate_index(baseurl, distro, flavour, pname: string): string =
+#proc generate_index(baseurl, distro, flavour, pname, pkg_directory_url: string): string =
 #  result = ""
 <html>
+  <head>
+    <link href="data:image/x-icon;base64,AAABAAEAEBAAAAAAAABoBQAAFgAAACgAAAAQAAAAIAAAAAEACAAAAAAAAAEAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAL/5AMfHxwAJCQkAg4ODACfU/wBzc3MA5OTkABPT/wD///8ASkpKAAYGBgAAruoACIfBAF5eXgAaFxMAERERAE5OTgAp1v8AANH/AOPj4wDs7OwAGtX/AB4eHgAo1f8AAM79ACAgIABdXV0A8PDwAACcyAA7OzsAmpqaABbU/wAAPVsABHu0AADG/wCE6P8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAjIwweAAYMIwAAAAAAAAASEhITAAAAARISBQAAAAAAGBISAAAAAAwZEiQAAAAAAAAgHQAVHA4WHQAAAAAAAAAAAAAVCQkUDgAAAAAAAAAAAAAAFQkJCRUAAAAAAAAAAAAAAAYJCQkGAAAAAAAAAAAAAAARCQkJAAAAAAAAAAAAAAAAACINBwMAAAAAAAAAAAAAABsTCCEaAAAAAAAAAAAAAAALHwIEDwAAAAAAAAAAAAAAFwAAAAoAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP//AADwjwAA4AMAAOADAADwBwAA8AcAAPAHAAD4DwAA/A8AAP4fAAD8HwAA/B8AAPwfAAD+PwAA//8AAP//AAA=" rel="icon" type="image/x-icon" />
+  </head>
   <body>
     <style>
-      div#main {
-        padding: 3em;
+      html {
+        margin: 0;
+      }
+      body {
+        margin: 0;
+      }
+      header {
+        border-bottom: 1px solid #999;
+        display: block;
+        text-align: center;
+        width: 100%;
+      }
+      article {
+        padding: 1em 3em 3em 3em;
         color: #444;
       }
       ul li {
         margin: 1em;
       }
-      footer {
-        background-color: #f4f4f4;
-        border-top: 1px solid #999;
-        bottom:0;
-        display: block;
-        left: 0;
-        margin: 0;
-        position: absolute;
-        text-align: center;
-        width: 100%;
-      }
-      footer a {
+      header a {
         text-decoration: none;
       }
     </style>
-    <div id="main">
+    <header>
+      <p>
+        <a href="https://github.com/FedericoCeratto/distrobadges">distrobadges</a>
+        - implemented in <a href="https://nim-lang.org">Nim</a>
+        - released under AGPLv3
+      </p>
+    </header>
+    <article>
     <h3>Package version badges</h3>
 
     <p>Show the current version of packages in Free Software distributions.<br/>
@@ -97,7 +108,8 @@
       </tr>
     </table>
 
-    <h4>Create a badge</h4>
+    <br/>
+    <h4>Create a badge for your project:</h4>
 
     <form action="/" method="post">
       <select id="distro_and_flavour" name="distro_and_flavour">
@@ -130,26 +142,19 @@
 
     <p>AsciiDoc</p>
     <pre>
-    image:${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg", link="${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg"]
+    image:${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg", link="${pkg_directory_url}"]
     </pre>
 
     <p>Markdown</p>
     <pre>
-    [![CircleCI](${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg)](${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg)
+    [![DebianBadge](${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg)](${pkg_directory_url})
     </pre>
 
     <p>reStructuredText</p>
     <pre>
     .. image:: ${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg
-        :target: ${baseurl}/badges/${distro}/${flavour}/${pname}/version.svg
+        :target: ${pkg_directory_url}
     </pre>
-    </div>
-    <footer>
-      <p>
-        <a href="https://github.com/FedericoCeratto/distrobadges">distrobadges</a>
-        - implemented in <a href="https://nim-lang.org">Nim</a>
-        - released under AGPLv3
-      </p>
-    </footer>
+    </article>
   </body>
 </html>
