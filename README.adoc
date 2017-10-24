@@ -1,6 +1,14 @@
 === Distrobadges
 
-Distribution version badges
+Badges for software packages in Linux distributions.
+
+Live instance: https://badges.debian.net/
+
+Examples:
+
+image::https://badges.debian.net/badges/debian/unstable/nim/version.svg[link="https://packages.debian.org/unstable/nim"]
+
+Development:
 
 .Devel Build:
 [source, bash]
