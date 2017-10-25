@@ -31,6 +31,8 @@ type
 const
   update_interval_s = 30 * 60
   defaultsfile = "/etc/default/distrobadges"
+
+  # format: distribution name, flavour, package list format, package URL template, package list URL
   distros: seq[DistroMetadata] = @[
     ("debian", "stable", "dpkg",
     "https://packages.$distro.org/$flavour/$pname",
@@ -55,6 +57,8 @@ var baseurl = "https://badges.debian.net/"
 var packages: DistroFlavors
 
 # TODO: handle curl getting an HTML error page instead of tarball
+# TODO: do not reload the file if there were no updates?
+# TODO: handle unpacking errors
 
 proc xz_unpack_package_list(src, dst: string) =
   ##
