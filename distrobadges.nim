@@ -34,7 +34,7 @@ const
   distros: seq[DistroMetadata] = @[
     ("debian", "stable", "dpkg",
     "https://packages.$distro.org/$flavour/$pname",
-    "http://cdn-fastly.deb.debian.org/debian/dists/wheezy/main/binary-amd64/Packages.bz2"),
+    "http://cdn-fastly.deb.debian.org/debian/dists/stable/main/binary-amd64/Packages.xz"),
     ("debian", "testing", "dpkg",
     "https://packages.$distro.org/$flavour/$pname",
     "http://cdn-fastly.deb.debian.org/debian/dists/testing/main/binary-amd64/Packages.xz"),
